@@ -1,72 +1,71 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow
- */
+import React, { Component } from "react";
+import { StyleSheet, View } from "react-native";
 
-import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, TextInput, Button } from 'react-native';
-
-import PlaceInput from './src/components/PlaceInput/PlaceInput';
-import PlaceList from './src/components/PlaceList/PlaceList';
-// import placeImage from './src/assets/image.jpg';
+import PlaceInput from "./src/components/PlaceInput/PlaceInput";
+import PlaceList from "./src/components/PlaceList/PlaceList";
+import PlaceDetail from "./src/components/PlaceDetail/PlaceDetail";
 
 export default class App extends Component {
   state = {
-    placeName: '',
-    places: []
-  }
-  placeNameChangedHandler = val => {
-    this.setState ({
-      placeName: val
-    })
-  }
+    places: [],
+    selectedPlace: null
+  };
 
-  placeSubmitHandler = () => {
-    if (this.state.placeName.trim() === "") {
-      return;
-    }
-
+  placeAddedHandler = placeName => {
     this.setState(prevState => {
       return {
         places: prevState.places.concat({
-              key: Math.random(),   
-              name: prevState.placeName,
-              image: {
-                uri: "https://media.wired.com/photos/5b2991d80da4a86262ab0b87/master/pass/GettyImages-954876578.jpg"
-              } 
-            })
-      }
-    })
-  }
+          key: Math.random(),
+          name: placeName,
+          image: {
+            uri:
+              "https://c1.staticflickr.com/5/4096/4744241983_34023bf303_b.jpg"
+          }
+        })
+      };
+    });
+  };
 
-  placeDeletedHandler = key => {
+  placeDeletedHandler = () => {
     this.setState(prevState => {
       return {
         places: prevState.places.filter(place => {
-          return place.key != key;
+          return place.key !== prevState.selectedPlace.key;
+        }),
+        selectedPlace: null
+      };
+    });
+  };
+
+  modalClosedHandler = () => {
+    this.setState({
+      selectedPlace: null
+    });
+  };
+
+  placeSelectedHandler = key => {
+    this.setState(prevState => {
+      return {
+        selectedPlace: prevState.places.find(place => {
+          return place.key === key;
         })
-      }
-    })
-  }
+      };
+    });
+  };
 
   render() {
-    
     return (
       <View style={styles.container}>
-        <View style={styles.inputContainer} >
-          <PlaceInput 
-              onChangeText={this.placeNameChangedHandler}
-              value={this.state.placeName} />
-          <Button
-              style={styles.placeButton}
-              title="Add"
-              onPress={this.placeSubmitHandler} />
-        </View>
-        <PlaceList places={this.state.places} onItemDeleted={this.placeDeletedHandler} />
-        
+        <PlaceDetail
+          selectedPlace={this.state.selectedPlace}
+          onItemDeleted={this.placeDeletedHandler}
+          onModalClosed={this.modalClosedHandler}
+        />
+        <PlaceInput onPlaceAdded={this.placeAddedHandler} />
+        <PlaceList
+          places={this.state.places}
+          onItemSelected={this.placeSelectedHandler}
+        />
       </View>
     );
   }
@@ -75,20 +74,9 @@ export default class App extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  inputContainer: {
-    //flex: 1,
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center"
-  },
-  placeButton: {
-    width: "30%"
-  },
-  
+    padding: 26,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "flex-start"
+  }
 });
